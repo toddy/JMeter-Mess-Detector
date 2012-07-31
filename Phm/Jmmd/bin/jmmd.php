@@ -2,7 +2,9 @@
 
 use Phm\Jmmd\JMeter\Normalizer\Normalizer;
 
-use Phm\Jmmd\Filter\UrlBlackListFilter;
+use Phm\Jmmd\Filter\UrlBlackListRegFilter;
+
+use Phm\Jmmd\Filter\UrlBlackListFileFilter;
 
 use Phm\Jmmd\Rule\NotFoundStatusCode;
 
@@ -65,14 +67,18 @@ function runAnalyzer(InputInterface $input, OutputInterface $output)
   $whiteListFilter->addRegEx("#^(\/syndication\/mobile\_feed\.php|\/video\/bc_feed.php|\/rss\/(gala_rss|beauty)\.html)(\?.+)?$#" );
   $jmmd->addFilter($whiteListFilter);
   
-  $blackListFilter = new UrlBlackListFilter();
-  $blackListFilter->addRegEx('#archiveid#');
-  $blackListFilter->addRegEx('#Uebersicht.html#');
-  $jmmd->addFilter($blackListFilter);
+  $blackListRegFilter = new UrlBlackListRegFilter();
+  $blackListRegFilter->addRegEx('#archiveid#');
+  $blackListRegFilter->addRegEx('#Uebersicht.html#');
+  $jmmd->addFilter($blackListRegFilter);
+  
+  $urlblackListUrlFilter = new UrlBlackListFileFilter();
+  $urlblackListUrlFilter->addUrlBlackListFileFilter();
+  $jmmd->addFilter($urlblackListUrlFilter);
   
   $normalizer = new Normalizer();
   $normalizedJMeterReport = $normalizer->getNormalizedReport($JMeterReport);
-  unset( $JMeterReport);
+  unset($JMeterReport);
   
   $violations = $jmmd->detect($normalizedJMeterReport);
 
